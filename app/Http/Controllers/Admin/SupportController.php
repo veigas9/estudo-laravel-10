@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\DTO\CreateSupportDTO;
+use App\DTO\UpdateSupportDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUpdateSuppport;
 use App\Models\Suppport;
@@ -49,12 +51,14 @@ class SupportController extends Controller
 
     public function store(StoreUpdateSuppport $request, Suppport $suppport )
     {
-        // Pega apenas os dados que foram validados
-        $data = $request->validated();
-        $data['status'] = 'a';
-        // dd($request->all());
+        //Implementando nosso parttner DTO
+        $this->service->new(CreateSupportDTO::makeFromRequest($request));
 
-        Suppport::create($data);
+        // Pega apenas os dados que foram validados
+        // $data = $request->validated();
+        // $data['status'] = 'a';
+        // dd($request->all());
+        // Suppport::create($data);
         
         return redirect()->route('supports.index');
     }
@@ -77,17 +81,18 @@ class SupportController extends Controller
     
     public function update(StoreUpdateSuppport $request, Suppport $support, string $id)
     {
-        //dd($id);
-        if(!$support = $support->find($id)){
+
+        $support = $this->service->update(UpdateSupportDTO::makeFromRequest($request));
+        
+        if(!$support){
             return back();
         }
 
         // $support->subject = $request->subject;
         // $support->body = $request->body;
         // $support->sabe
-
         // Pego apenas os dados que foram validados
-        $support->update($request->validated());
+        //$support->update($request->validated());
 
         return redirect()->route('supports.index');
     }
