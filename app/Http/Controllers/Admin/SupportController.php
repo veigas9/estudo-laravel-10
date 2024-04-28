@@ -6,27 +6,33 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreUpdateSuppport;
 use App\Models\Suppport;
 use Illuminate\Http\Request;
+use App\Services\SupportService;
 
 class SupportController extends Controller
 {
-    public function index(Suppport $support)//Injeção de dependencia
+    public function __construct(
+        protected SupportService $service
+    )
+    {
+        
+    }
+    public function index(Request $request)//Injeção de dependencia
     {
         //Me retorna todo support
-        $supports = $support->all();
+        $supports = $this->service->getAll($request->filter);
         //dd($supports);
 
         return view('admin/supports/index', compact('supports'));
     }
 
-    public function show(string|int $id)
+    public function show(String $id)
     {
-       if( !$support = Suppport::find($id)){
+       if( !$support = $this->service->findOne($id)){
             return redirect()->back();
        };
         // dd($support);
        return view('admin/supports/show', compact('support'));       
     }
-
 
     /**
      * Cria form para cadastro
@@ -59,9 +65,9 @@ class SupportController extends Controller
  * @param string|integer $id
  * @return void
  */
-    public function edit(Suppport $support, string|int $id)
+    public function edit(String $id)
     {        
-        if(!$support = $support->where('id', $id)->first()){
+        if(!$support = $this->service->findOne($id)){
             return back();
         }
 
@@ -86,13 +92,9 @@ class SupportController extends Controller
         return redirect()->route('supports.index');
     }
 
-    public function destroy(string|int $id)
+    public function destroy(String $id)
     {
-        if(!$support = Suppport::find($id)->delete()){         
-            return back();
-        }
-
-        //$support->delete();
+        $this->service->delete($id);
 
         return redirect()->route('supports.index');
 
